@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const PointHistory = require('../models/PointHistory');
 const bcrypt = require('bcryptjs'); // Ensure this is imported at the top (I might need to add it separately if not present)
 
 // ... inside updateUserProfile ...
@@ -82,6 +83,35 @@ const updateUserProfile = async (req, res) => {
                 user.password = await bcrypt.hash(req.body.password, salt);
             }
 
+            // CHECK PROFILE COMPLETION (Alumni Only)
+            if (user.role === 'alumni' && !user.isProfileCompleteAwarded) {
+                const isComplete =
+                    user.bio &&
+                    user.skills && user.skills.length > 0 &&
+                    user.location &&
+                    user.company &&
+                    user.jobTitle &&
+                    user.linkedin;
+
+                if (isComplete) {
+                    const { POINTS } = require('./gamificationController');
+                    // Use the helper to award points and log history
+                    // We need to call awardPoints which is defined in this file now
+                    await awardPoints(user._id, POINTS.PROFILE_COMPLETE, 'Completed Profile', 'profile');
+
+                    user.isProfileCompleteAwarded = true;
+
+                    // Create Notification
+                    const Notification = require('../models/Notification');
+                    await Notification.create({
+                        recipient: user._id,
+                        message: `🎉 Profile Completed! You earned ${POINTS.PROFILE_COMPLETE} points.`,
+                        type: 'system',
+                        read: false
+                    });
+                }
+            }
+
             const updatedUser = await user.save();
 
             res.json({
@@ -97,7 +127,9 @@ const updateUserProfile = async (req, res) => {
                 skills: updatedUser.skills,
                 company: updatedUser.company,
                 jobTitle: updatedUser.jobTitle,
-                linkedin: updatedUser.linkedin
+                linkedin: updatedUser.linkedin,
+                points: updatedUser.points,
+                badges: updatedUser.badges
             });
         } else {
             res.status(404).json({ message: 'User not found' });
@@ -214,10 +246,44 @@ const updateUser = async (req, res) => {
     }
 };
 
+// Helper to award points and log history
+const awardPoints = async (userId, points, action, type = 'other') => {
+    try {
+        const user = await User.findById(userId);
+        if (!user) return;
+
+        user.points = (user.points || 0) + points;
+        await user.save();
+
+        await PointHistory.create({
+            user: userId,
+            action,
+            points,
+            type
+        });
+    } catch (error) {
+        console.error('Error awarding points:', error);
+    }
+};
+
+const getPointHistory = async (req, res) => {
+    try {
+        const history = await PointHistory.find({ user: req.user._id })
+            .sort({ createdAt: -1 })
+            .limit(20);
+        res.json(history);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
 module.exports = {
     getAlumni,
     getUserById,
     updateUserProfile,
     createUser,
-    updateUser
+    updateUser,
+    getPointHistory,
+    awardPoints // Exporting for use in other controllers if needed
 };

@@ -5,6 +5,8 @@ import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
 import BadgeDisplay from '../../components/BadgeDisplay';
+// import RoadplanWidget from '../../components/RoadplanWidget'; // Deprecated
+import PointsProgressWidget from '../../components/PointsProgressWidget';
 
 const AlumniDashboard = () => {
     const { user } = useAuth();
@@ -15,6 +17,7 @@ const AlumniDashboard = () => {
     });
     const [recommendedQueries, setRecommendedQueries] = useState([]);
     const [topMentors, setTopMentors] = useState([]);
+    const [roadplan, setRoadplan] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -23,8 +26,9 @@ const AlumniDashboard = () => {
                 // Fetch Queries
                 const { data: queries } = await api.get('/queries');
 
-                // Fetch Latest User Data (for points/badges)
+                // Fetch Latest User Data (for points/badges/roadplan)
                 const { data: userData } = await api.get('/auth/me');
+                setRoadplan(userData.roadplan || []);
 
                 // Fetch Leaderboard for Sidebar
                 const { data: leaderboard } = await api.get('/gamification/leaderboard');
@@ -119,8 +123,11 @@ const AlumniDashboard = () => {
                     )}
                 </div>
 
-                {/* Sidebar - Leaderboard */}
+                {/* Sidebar - Leaderboard & Progress */}
                 <div className="space-y-6">
+                    {/* Points Progress Widget (Replaces Roadplan) */}
+                    <PointsProgressWidget points={stats.reputation} user={user} />
+
                     <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                         <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
                             <Award className="text-amber-500" size={20} />

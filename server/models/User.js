@@ -22,6 +22,13 @@ const userSchema = mongoose.Schema({
     // Gamification
     points: { type: Number, default: 0 },
     badges: [{ type: String }], // 'Rookie', 'Rising Star', 'Mentor', 'Legend'
+    isProfileCompleteAwarded: { type: Boolean, default: false },
+
+    // Roadplan
+    roadplan: [{
+        title: { type: String, required: true },
+        completed: { type: Boolean, default: false }
+    }],
 
 }, { timestamps: true });
 

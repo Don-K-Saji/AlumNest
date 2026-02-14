@@ -123,8 +123,32 @@ const getMe = async (req, res) => {
     res.status(200).json(req.user);
 };
 
+// @desc    Update User Roadplan
+// @route   PUT /api/auth/roadplan
+// @access  Private
+const updateRoadplan = async (req, res) => {
+    const { roadplan } = req.body;
+
+    try {
+        const user = await User.findById(req.user.id);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        user.roadplan = roadplan;
+        const updatedUser = await user.save();
+
+        res.json(updatedUser.roadplan);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
 module.exports = {
     registerUser,
     loginUser,
     getMe,
+    updateRoadplan
 };

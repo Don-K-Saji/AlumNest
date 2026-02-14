@@ -41,7 +41,11 @@ const Register = () => {
         const result = await register(userData);
 
         if (result.success) {
-            navigate('/student/dashboard'); // Or direct to dashboard based on role
+            if (role === 'alumni') {
+                navigate('/alumni/dashboard');
+            } else {
+                navigate('/student/dashboard');
+            }
         } else {
             setError(result.message);
         }
