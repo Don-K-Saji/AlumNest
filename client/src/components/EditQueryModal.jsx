@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 
@@ -36,7 +37,7 @@ const EditQueryModal = ({ isOpen, onClose, query, onQueryUpdated }) => {
             onClose();
         } catch (error) {
             console.error("Failed to update query", error);
-            alert("Failed to update query");
+            toast.error("Failed to update query");
         } finally {
             setLoading(false);
         }

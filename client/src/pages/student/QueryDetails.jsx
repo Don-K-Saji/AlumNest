@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, Clock, MessageCircle, Send, Edit, ThumbsUp, Check, Award } from 'lucide-react';
 import api from '../../services/api';
+import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import AlumniHoverCard from '../../components/AlumniHoverCard';
 import EditQueryModal from '../../components/EditQueryModal';
@@ -43,7 +44,7 @@ const QueryDetails = () => {
             setQuery(prev => ({ ...prev, status: 'Resolved' }));
         } catch (error) {
             console.error("Failed to update status", error);
-            alert("Failed to update status");
+            toast.error("Failed to update status");
         }
     };
 
@@ -76,7 +77,7 @@ const QueryDetails = () => {
             }));
         } catch (error) {
             console.error("Failed to accept solution", error);
-            alert(error.response?.data?.message || "Failed to accept solution");
+            toast.error(error.response?.data?.message || "Failed to accept solution");
         }
     };
 
@@ -102,7 +103,7 @@ const QueryDetails = () => {
             setEditContent('');
         } catch (error) {
             console.error("Failed to update response", error);
-            alert("Failed to update response");
+            toast.error("Failed to update response");
         }
     };
 
@@ -133,7 +134,7 @@ const QueryDetails = () => {
             setReplyContent('');
         } catch (error) {
             console.error("Failed to post reply", error);
-            alert("Failed to post reply.");
+            toast.error("Failed to post reply.");
         } finally {
             setSubmitting(false);
         }
@@ -217,7 +218,9 @@ const QueryDetails = () => {
                     <div className="space-y-6">
                         {query.responses && query.responses.length > 0 ? (
                             query.responses.map((resp, idx) => {
-                                const isLiked = resp.upvotes && resp.upvotes.includes(user._id);
+                                const isLiked = resp.upvotes && resp.upvotes.some(id =>
+                                    (typeof id === 'object' ? id._id === user._id : id === user._id)
+                                );
                                 const likeCount = resp.upvotes ? resp.upvotes.length : 0;
                                 const isResponseAuthor = user && (resp.author._id === user._id || resp.author === user._id);
                                 const isEditing = editingResponseId === resp._id;
@@ -274,12 +277,12 @@ const QueryDetails = () => {
                                                 {/* Like Button */}
                                                 <button
                                                     onClick={() => handleLike(resp._id)}
-                                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${isLiked
-                                                        ? 'bg-blue-50 text-blue-600'
+                                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-300 active:scale-95 ${isLiked
+                                                        ? 'bg-green-100 text-green-600 shadow-[0_0_15px_rgba(34,197,94,0.4)] border border-green-200'
                                                         : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                                                         }`}
                                                 >
-                                                    <ThumbsUp size={14} className={isLiked ? 'fill-blue-600' : ''} />
+                                                    <ThumbsUp size={14} className={isLiked ? 'fill-green-600' : ''} />
                                                     {likeCount > 0 && <span>{likeCount}</span>}
                                                 </button>
                                             </div>

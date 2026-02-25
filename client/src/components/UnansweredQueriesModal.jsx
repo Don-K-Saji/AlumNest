@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, MessageSquare } from 'lucide-react';
+import toast from 'react-hot-toast';
 import api from '../services/api';
 
 const UnansweredQueriesModal = ({ isOpen, onClose }) => {
@@ -32,10 +33,10 @@ const UnansweredQueriesModal = ({ isOpen, onClose }) => {
         try {
             setNudging(queryId);
             const { data } = await api.post(`/queries/${queryId}/nudge`);
-            alert(data.message); // Simple feedback for now
+            toast.success(data.message); // Simple feedback for now
         } catch (error) {
             console.error("Failed to nudge", error);
-            alert("Failed to send nudge.");
+            toast.error("Failed to send nudge.");
         } finally {
             setNudging(null);
         }
@@ -74,8 +75,8 @@ const UnansweredQueriesModal = ({ isOpen, onClose }) => {
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-1">
                                                 <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${query.type === 'targeted' ? 'bg-purple-100 text-purple-700' :
-                                                        query.type === 'category' ? 'bg-blue-100 text-blue-700' :
-                                                            'bg-green-100 text-green-700'
+                                                    query.type === 'category' ? 'bg-blue-100 text-blue-700' :
+                                                        'bg-green-100 text-green-700'
                                                     }`}>
                                                     {query.type}
                                                 </span>

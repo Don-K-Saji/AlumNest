@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle2, Star, Target, MessageCircle, UserCheck, History, Award } from 'lucide-react';
-import api from '../utils/api';
+import api from '../services/api';
 import moment from 'moment';
 
 const PointsHistoryModal = ({ isOpen, onClose, points, level, user }) => {
@@ -29,9 +29,9 @@ const PointsHistoryModal = ({ isOpen, onClose, points, level, user }) => {
     // Define earnable actions
     const earnActions = [
         { icon: UserCheck, label: 'Complete Profile', points: 50, completed: user?.isProfileCompleteAwarded },
-        { icon: MessageCircle, label: 'Answer a Query', points: 10, completed: false },
-        { icon: CheckCircle2, label: 'Get Answer Accepted', points: 20, completed: false },
-        { icon: Star, label: 'Receive a Like', points: 5, completed: false },
+        { icon: MessageCircle, label: 'Answer a Query', points: 20, completed: false },
+        { icon: CheckCircle2, label: 'Get Answer Accepted', points: 50, completed: false },
+        { icon: Star, label: 'Receive a Like', points: 10, completed: false },
     ];
 
     return (
@@ -95,7 +95,9 @@ const PointsHistoryModal = ({ isOpen, onClose, points, level, user }) => {
                                                     <p className="text-slate-900 font-medium text-sm">{item.action}</p>
                                                     <p className="text-xs text-slate-400">{moment(item.createdAt).fromNow()}</p>
                                                 </div>
-                                                <span className="font-bold text-green-600 text-sm">+{item.points} pts</span>
+                                                <span className={`font-bold text-sm ${item.points >= 0 ? 'text-green-600' : 'text-rose-500'}`}>
+                                                    {item.points > 0 ? '+' : ''}{item.points} pts
+                                                </span>
                                             </div>
                                         ))
                                     ) : (
@@ -116,8 +118,8 @@ const PointsHistoryModal = ({ isOpen, onClose, points, level, user }) => {
                                         <div
                                             key={index}
                                             className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${action.completed
-                                                    ? 'bg-green-50 border-green-100 opacity-60'
-                                                    : 'bg-white border-slate-100 hover:border-indigo-200 hover:shadow-sm'
+                                                ? 'bg-green-50 border-green-100 opacity-60'
+                                                : 'bg-white border-slate-100 hover:border-indigo-200 hover:shadow-sm'
                                                 }`}
                                         >
                                             <div className={`p-2.5 rounded-full ${action.completed ? 'bg-green-100 text-green-600' : 'bg-slate-50 text-slate-400'

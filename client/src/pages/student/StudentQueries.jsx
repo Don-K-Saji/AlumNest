@@ -4,6 +4,9 @@ import { MessageCircle, CheckCircle, Clock } from 'lucide-react';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 
+import { motion } from 'framer-motion';
+import PageTransition from '../../components/ui/PageTransition';
+
 const StudentQueries = () => {
     const { user } = useAuth();
     const [queries, setQueries] = useState([]);
@@ -31,17 +34,50 @@ const StudentQueries = () => {
 
     if (loading) return <div className="p-8 text-center text-slate-500">Loading your queries...</div>;
 
+    // Animation Variants
+    const container = {
+        hidden: { opacity: 0 },
+        show: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.15 // Slower cascade
+            }
+        }
+    };
+
+    const item = {
+        hidden: { opacity: 0, y: 20 },
+        show: {
+            opacity: 1,
+            y: 0,
+            transition: {
+                duration: 0.5, // Gradual fade/slide
+                ease: "easeOut"
+            }
+        }
+    };
+
     return (
-        <div className="space-y-6">
+        <PageTransition className="space-y-6">
             <h2 className="text-2xl font-bold text-slate-900">My Queries</h2>
 
-            <div className="space-y-4">
+            <motion.div
+                className="space-y-4"
+                variants={container}
+                initial="hidden"
+                animate="show"
+            >
                 {queries.length > 0 ? (
                     queries.map((q) => (
-                        <div key={q._id} className="bg-white p-6 rounded-2xl border border-slate-200 hover:shadow-md transition-all">
+                        <motion.div
+                            key={q._id}
+                            variants={item}
+                            whileHover={{ borderColor: 'rgba(59, 130, 246, 0.5)', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}
+                            className="bg-white p-6 rounded-2xl border border-slate-200 cursor-pointer group"
+                        >
                             <div className="flex items-start justify-between mb-4">
                                 <div>
-                                    <h3 className="text-lg font-bold text-slate-900 mb-2">{q.title}</h3>
+                                    <h3 className="text-lg font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">{q.title}</h3>
                                     <div className="flex gap-2">
                                         {q.tags && q.tags.map((tag, index) => (
                                             <span key={index} className="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-md font-medium">
@@ -71,15 +107,15 @@ const StudentQueries = () => {
                                     View Discussion
                                 </Link>
                             </div>
-                        </div>
+                        </motion.div>
                     ))
                 ) : (
-                    <div className="text-center py-10 bg-white rounded-2xl border border-slate-200">
+                    <motion.div variants={item} className="text-center py-10 bg-white rounded-2xl border border-slate-200">
                         <p className="text-slate-500">You haven't asked any queries yet.</p>
-                    </div>
+                    </motion.div>
                 )}
-            </div>
-        </div>
+            </motion.div>
+        </PageTransition>
     );
 };
 

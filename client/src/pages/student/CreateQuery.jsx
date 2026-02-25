@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Send, Hash, Target, Globe, User } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../../services/api';
+import { motion } from 'framer-motion';
+import PageTransition from '../../components/ui/PageTransition';
 
 const CreateQuery = () => {
     const navigate = useNavigate();
@@ -42,14 +45,31 @@ const CreateQuery = () => {
             navigate('/student/queries');
         } catch (error) {
             console.error("Failed to create query", error);
-            alert("Failed to post query. Please try again.");
+            toast.error("Failed to post query. Please try again.");
         } finally {
             setLoading(false);
         }
     };
 
+    const container = {
+        hidden: { opacity: 0 },
+        show: {
+            opacity: 1,
+            transition: { staggerChildren: 0.1 }
+        }
+    };
+
+    const item = {
+        hidden: { opacity: 0, y: 20 },
+        show: {
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.5, ease: "easeOut" }
+        }
+    };
+
     return (
-        <div className="max-w-3xl mx-auto">
+        <PageTransition className="max-w-3xl mx-auto">
             <div className="text-center mb-10">
                 <h2 className="text-2xl font-bold text-slate-900">Ask the Community</h2>
                 <p className="text-slate-500 mt-2">Get guidance from alumni who have been in your shoes</p>
@@ -88,8 +108,14 @@ const CreateQuery = () => {
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
+                <motion.form
+                    onSubmit={handleSubmit}
+                    className="space-y-6"
+                    variants={container}
+                    initial="hidden"
+                    animate="show"
+                >
+                    <motion.div variants={item}>
                         <label className="block text-sm font-medium text-slate-700 mb-2">Subject</label>
                         <input
                             type="text"
@@ -99,10 +125,10 @@ const CreateQuery = () => {
                             value={formData.title}
                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                         />
-                    </div>
+                    </motion.div>
 
                     {queryType === 'company' && (
-                        <div>
+                        <motion.div variants={item}>
                             <label className="block text-sm font-medium text-slate-700 mb-2">Target Category</label>
                             <input
                                 type="text"
@@ -112,10 +138,10 @@ const CreateQuery = () => {
                                 onChange={(e) => setFormData({ ...formData, targetCompany: e.target.value })}
                             />
                             <p className="text-xs text-slate-500 mt-1">Alumni matching this company, skill, role, or location will be notified.</p>
-                        </div>
+                        </motion.div>
                     )}
 
-                    <div>
+                    <motion.div variants={item}>
                         <label className="block text-sm font-medium text-slate-700 mb-2">Description</label>
                         <textarea
                             rows={6}
@@ -125,9 +151,9 @@ const CreateQuery = () => {
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         ></textarea>
-                    </div>
+                    </motion.div>
 
-                    <div>
+                    <motion.div variants={item}>
                         <label className="block text-sm font-medium text-slate-700 mb-2">Tags</label>
                         <input
                             type="text"
@@ -136,9 +162,9 @@ const CreateQuery = () => {
                             value={formData.tags}
                             onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
                         />
-                    </div>
+                    </motion.div>
 
-                    <div className="pt-4 flex justify-end">
+                    <motion.div variants={item} className="pt-4 flex justify-end">
                         <button
                             type="submit"
                             disabled={loading}
@@ -147,10 +173,10 @@ const CreateQuery = () => {
                             <Send size={18} />
                             {loading ? 'Posting...' : 'Post Query'}
                         </button>
-                    </div>
-                </form>
+                    </motion.div>
+                </motion.form>
             </div>
-        </div>
+        </PageTransition>
     );
 };
 

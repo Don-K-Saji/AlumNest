@@ -94,9 +94,8 @@ const updateUserProfile = async (req, res) => {
                     user.linkedin;
 
                 if (isComplete) {
-                    const { POINTS } = require('./gamificationController');
+                    const { POINTS, awardPoints } = require('./gamificationController');
                     // Use the helper to award points and log history
-                    // We need to call awardPoints which is defined in this file now
                     await awardPoints(user._id, POINTS.PROFILE_COMPLETE, 'Completed Profile', 'profile');
 
                     user.isProfileCompleteAwarded = true;
@@ -246,25 +245,7 @@ const updateUser = async (req, res) => {
     }
 };
 
-// Helper to award points and log history
-const awardPoints = async (userId, points, action, type = 'other') => {
-    try {
-        const user = await User.findById(userId);
-        if (!user) return;
-
-        user.points = (user.points || 0) + points;
-        await user.save();
-
-        await PointHistory.create({
-            user: userId,
-            action,
-            points,
-            type
-        });
-    } catch (error) {
-        console.error('Error awarding points:', error);
-    }
-};
+// Removed local awardPoints, now imported from gamificationController inline where needed.
 
 const getPointHistory = async (req, res) => {
     try {
@@ -273,7 +254,7 @@ const getPointHistory = async (req, res) => {
             .limit(20);
         res.json(history);
     } catch (error) {
-        console.error(error);
+        console.error("Error in getPointHistory:", error);
         res.status(500).json({ message: 'Server Error' });
     }
 };
@@ -284,6 +265,5 @@ module.exports = {
     updateUserProfile,
     createUser,
     updateUser,
-    getPointHistory,
-    awardPoints // Exporting for use in other controllers if needed
+    getPointHistory
 };

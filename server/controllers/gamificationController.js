@@ -2,6 +2,7 @@ const User = require('../models/User');
 const Response = require('../models/Response');
 const Query = require('../models/Query');
 const Notification = require('../models/Notification');
+const PointHistory = require('../models/PointHistory');
 
 // Point Constants
 const POINTS = {
@@ -20,11 +21,11 @@ const BADGES = {
 };
 
 // Helper: Award Points & Check Badges
-const awardPoints = async (userId, amount) => {
+const awardPoints = async (userId, points, action, type = 'other') => {
     const user = await User.findById(userId);
     if (!user) return;
 
-    user.points += amount;
+    user.points = (user.points || 0) + points;
 
     // Check Badges
     const currentPoints = user.points;
@@ -50,6 +51,19 @@ const awardPoints = async (userId, amount) => {
     }
 
     await user.save();
+
+    if (action) {
+        try {
+            await PointHistory.create({
+                user: userId,
+                action,
+                points,
+                type
+            });
+        } catch (error) {
+            console.error('Error recording point history:', error);
+        }
+    }
 };
 
 // @desc    Toggle Like on a response
@@ -62,27 +76,35 @@ const toggleLike = async (req, res) => {
             return res.status(404).json({ message: 'Response not found' });
         }
 
-        const userId = req.user.id;
-        const isLiked = response.upvotes.includes(userId);
+        const userIdStr = req.user.id.toString();
+        const isLiked = response.upvotes.some(id => id.toString() === userIdStr);
 
         if (isLiked) {
             // Unlike
-            response.upvotes = response.upvotes.filter(id => id.toString() !== userId);
-            // Deduct points? Maybe not to avoid negativity, or yes to keep balance. 
-            // Let's NOT deduct for now to simplify.
+            response.upvotes = response.upvotes.filter(id => id.toString() !== userIdStr);
+            // Deduct points from author
+            if (response.author.toString() !== userIdStr) {
+                await awardPoints(response.author, -POINTS.LIKE, 'Like Removed', 'vote');
+                // Note: We don't typically send a notification for unliking to avoid spam
+            }
         } else {
             // Like
-            response.upvotes.push(userId);
+            response.upvotes.push(userIdStr);
             // Award points to author
-            if (response.author.toString() !== userId) { // Don't reward self-likes
-                await awardPoints(response.author, POINTS.LIKE);
+            if (response.author.toString() !== userIdStr) { // Don't reward self-likes
+                const authorUser = await User.findById(response.author);
+                const notificationLink = authorUser && authorUser.role === 'alumni'
+                    ? '/alumni/feed'
+                    : `/student/queries/${response.query}`;
+
+                await awardPoints(response.author, POINTS.LIKE, 'Received a Like', 'vote');
 
                 // Notify author
                 await Notification.create({
                     recipient: response.author,
                     message: `Someone liked your response! (+${POINTS.LIKE} pts)`,
                     type: 'like',
-                    link: `/student/queries/${response.query}`,
+                    link: notificationLink,
                     read: false
                 });
             }
@@ -129,14 +151,19 @@ const acceptResponse = async (req, res) => {
 
         // 3. Award Points to Responder
         if (response.author.toString() !== req.user.id) {
-            await awardPoints(response.author, POINTS.ACCEPTED);
+            const authorUser = await User.findById(response.author);
+            const notificationLink = authorUser && authorUser.role === 'alumni'
+                ? '/alumni/feed'
+                : `/student/queries/${query._id}`;
+
+            await awardPoints(response.author, POINTS.ACCEPTED, 'Get Answer Accepted', 'answer');
 
             // Notify Responder
             await Notification.create({
                 recipient: response.author,
                 message: `✅ Your answer was accepted as the solution! (+${POINTS.ACCEPTED} pts)`,
                 type: 'reply',
-                link: `/alumni/feed`, // or query link
+                link: notificationLink,
                 read: false
             });
         }
@@ -155,10 +182,10 @@ const acceptResponse = async (req, res) => {
 const getLeaderboard = async (req, res) => {
     try {
         // Top 10 Alumni by points
-        const users = await User.find({ role: 'alumni' })
+        const users = await User.find({ role: 'alumni', isVerified: true })
             .sort({ points: -1 })
             .limit(10)
-            .select('name points badges jobTitle company location'); // Select specific fields
+            .select('name points badges jobTitle company location skills role'); // Select specific fields
 
         res.json(users);
     } catch (error) {

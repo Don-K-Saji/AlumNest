@@ -236,11 +236,9 @@ const addResponse = async (req, res) => {
             }
 
             // AWARD POINTS for Reply
-            // Only award if it's an Alumni replying (Student replies don't get points usually, or maybe they do?
-            // The gamification plan says "When Alumni replies".
-            // Let's check role.
+            // Only award if it's an Alumni replying
             if (req.user.role === 'alumni') {
-                await awardPoints(req.user.id, POINTS.REPLY);
+                await awardPoints(req.user.id, POINTS.REPLY, 'Answered a Query', 'answer');
             }
         }
 

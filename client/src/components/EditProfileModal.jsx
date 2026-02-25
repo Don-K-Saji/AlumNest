@@ -81,7 +81,6 @@ const EditProfileModal = ({ isOpen, onClose }) => {
             };
 
             const { data } = await api.put('/users/profile', payload);
-            console.log("Profile update success, server response:", data);
 
             // Update auth context with new user data
             // Maintain the token from existing user object or the response if backend returns it

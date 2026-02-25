@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Trophy, Medal, MapPin, Briefcase } from 'lucide-react';
 import BadgeDisplay from '../../components/BadgeDisplay';
+import AlumniHoverCard from '../../components/AlumniHoverCard';
 import api from '../../services/api';
 
 const Leaderboard = () => {
@@ -48,15 +49,15 @@ const Leaderboard = () => {
                 </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-visible">
+                <div className="w-full">
                     <table className="w-full text-left">
-                        <thead className="bg-slate-50 border-b border-slate-200">
-                            <tr>
-                                <th className="px-6 py-4 font-semibold text-slate-700 text-sm w-20 text-center">Rank</th>
+                        <thead className="border-b border-slate-200">
+                            <tr className="bg-slate-50">
+                                <th className="px-6 py-4 font-semibold text-slate-700 text-sm w-20 text-center first:rounded-tl-2xl">Rank</th>
                                 <th className="px-6 py-4 font-semibold text-slate-700 text-sm">Alumni</th>
                                 <th className="px-6 py-4 font-semibold text-slate-700 text-sm">Badge</th>
-                                <th className="px-6 py-4 font-semibold text-slate-700 text-sm text-right">Points</th>
+                                <th className="px-6 py-4 font-semibold text-slate-700 text-sm text-right last:rounded-tr-2xl">Points</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -75,9 +76,7 @@ const Leaderboard = () => {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm">
-                                                {alum.name[0]}
-                                            </div>
+                                            <AlumniHoverCard author={alum} />
                                             <div>
                                                 <h4 className="font-bold text-slate-900">{alum.name}</h4>
                                                 <p className="text-xs text-slate-500 flex items-center gap-2">

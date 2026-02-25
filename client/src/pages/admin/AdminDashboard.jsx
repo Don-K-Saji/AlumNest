@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Users, ShieldAlert, CheckCircle, TrendingUp, AlertCircle } from 'lucide-react';
+import { Users, ShieldAlert, CheckCircle, TrendingUp, AlertCircle, ArrowRight } from 'lucide-react';
 import api from '../../services/api';
 
 import UnansweredQueriesModal from '../../components/UnansweredQueriesModal';
+import PageTransition from '../../components/ui/PageTransition';
+import Card from '../../components/ui/Card';
+import StatCard from '../../components/ui/StatCard';
+import Button from '../../components/ui/Button';
 
 const AdminDashboard = () => {
     const [stats, setStats] = useState({
@@ -54,48 +57,59 @@ const AdminDashboard = () => {
     if (loading) return <div className="p-8 text-center text-slate-500">Loading admin dashboard...</div>;
 
     return (
-        <div className="space-y-8">
+        <PageTransition className="space-y-8">
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <StatCard
-                    icon={<ShieldAlert className="text-indigo-600" />}
-                    label="Pending Verifications"
-                    value={stats.pending}
-                    trend={stats.pending > 0 ? "Requires Attention" : "All Caught Up"}
-                    trendColor={stats.pending > 0 ? "text-indigo-600" : "text-green-600"}
-                    to="/admin/verify-users"
-                />
-                <StatCard
-                    icon={<Users className="text-blue-600" />}
-                    label="Total Users"
-                    value={stats.total}
-                    trend="Registered Members"
-                    trendColor="text-green-600"
-                    to="/admin/users"
-                />
-                <StatCard
-                    icon={<CheckCircle className="text-indigo-600" />}
-                    label="Alumni Verified"
-                    value={stats.verified}
-                    trend="Legitimacy Checked"
-                    trendColor="text-blue-600"
-                    to="/admin/users"
-                />
+                <Link to="/admin/verify-users">
+                    <StatCard
+                        icon={<ShieldAlert size={24} />}
+                        label="Pending Verifications"
+                        value={stats.pending}
+                        subtext={stats.pending > 0 ? "Requires Attention" : "All Caught Up"}
+                        trend="Action"
+                        trendType={stats.pending > 0 ? "down" : "neutral"}
+                        color={stats.pending > 0 ? "amber" : "green"}
+                    />
+                </Link>
+                <Link to="/admin/users">
+                    <StatCard
+                        icon={<Users size={24} />}
+                        label="Total Users"
+                        value={stats.total}
+                        subtext="Registered Members"
+                        trend="Live"
+                        trendType="up"
+                        color="blue"
+                    />
+                </Link>
+                <Link to="/admin/users">
+                    <StatCard
+                        icon={<CheckCircle size={24} />}
+                        label="Alumni Verified"
+                        value={stats.verified}
+                        subtext="Legitimacy Checked"
+                        trend="Verified"
+                        trendType="up"
+                        color="purple"
+                    />
+                </Link>
             </div>
 
             <div className="grid md:grid-cols-2 gap-8">
                 {/* Recent Registrations */}
-                <section className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <Card variant="glass" className="h-full">
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="text-lg font-bold text-slate-900">Recent Registrations</h3>
-                        <Link to="/admin/users" className="text-sm text-blue-600 font-medium hover:underline">View All</Link>
+                        <Link to="/admin/users" className="text-sm text-blue-600 font-medium hover:underline flex items-center gap-1">
+                            View All <ArrowRight size={14} />
+                        </Link>
                     </div>
 
                     <div className="space-y-4">
                         {stats.recentUsers?.length > 0 ? (
                             stats.recentUsers.map(user => (
-                                <div key={user._id} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">
+                                <div key={user._id} className="flex items-center gap-3 p-3 hover:bg-white/50 rounded-xl transition-colors border border-transparent hover:border-slate-100">
+                                    <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs ring-2 ring-white">
                                         {user.name[0]}
                                     </div>
                                     <div>
@@ -108,10 +122,10 @@ const AdminDashboard = () => {
                             <p className="text-slate-500 text-sm text-center py-4">No recent registrations.</p>
                         )}
                     </div>
-                </section>
+                </Card>
 
                 {/* System Alerts */}
-                <section className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <Card variant="glass" className="h-full">
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="text-lg font-bold text-slate-900">System Alerts</h3>
                     </div>
@@ -119,24 +133,26 @@ const AdminDashboard = () => {
                     <div className="space-y-3">
                         {/* Pending Verifications Alert */}
                         {stats.pending > 0 ? (
-                            <div className="p-4 bg-amber-50 rounded-xl border border-amber-100 flex gap-3">
+                            <div className="p-4 bg-amber-50/50 rounded-xl border border-amber-100 flex gap-3">
                                 <AlertCircle className="text-amber-600 shrink-0" size={20} />
                                 <div>
-                                    <h4 className="font-bold text-amber-800 text-sm mb-1">Action Required</h4>
-                                    <p className="text-xs text-amber-700">
+                                    <h4 className="font-bold text-amber-900 text-sm mb-1">Action Required</h4>
+                                    <p className="text-xs text-amber-700/80">
                                         {stats.pending} alumni account{stats.pending !== 1 && 's'} pending verification.
                                     </p>
-                                    <Link to="/admin/verify-users" className="text-xs font-bold text-amber-800 underline mt-1 inline-block">
-                                        Review Now
+                                    <Link to="/admin/verify-users">
+                                        <Button size="sm" variant="ghost" className="!p-0 !h-auto !text-amber-700 hover:!bg-transparent hover:underline mt-2">
+                                            Review Now
+                                        </Button>
                                     </Link>
                                 </div>
                             </div>
                         ) : (
-                            <div className="p-4 bg-green-50 rounded-xl border border-green-100 flex gap-3">
+                            <div className="p-4 bg-green-50/50 rounded-xl border border-green-100 flex gap-3">
                                 <CheckCircle className="text-green-600 shrink-0" size={20} />
                                 <div>
-                                    <h4 className="font-bold text-green-800 text-sm mb-1">All Systems Normal</h4>
-                                    <p className="text-xs text-green-600">No pending actions required.</p>
+                                    <h4 className="font-bold text-green-900 text-sm mb-1">All Systems Normal</h4>
+                                    <p className="text-xs text-green-700/80">No pending actions required.</p>
                                 </div>
                             </div>
                         )}
@@ -145,12 +161,12 @@ const AdminDashboard = () => {
                         {stats.unanswered > 0 && (
                             <div
                                 onClick={() => setIsQueriesModalOpen(true)}
-                                className="p-4 bg-blue-50 rounded-xl border border-blue-100 flex gap-3 cursor-pointer hover:bg-blue-100 transition-colors"
+                                className="p-4 bg-blue-50/50 rounded-xl border border-blue-100 flex gap-3 cursor-pointer hover:bg-blue-100/50 transition-colors"
                             >
                                 <AlertCircle className="text-blue-600 shrink-0" size={20} />
                                 <div>
-                                    <h4 className="font-bold text-blue-800 text-sm mb-1">Quality Control</h4>
-                                    <p className="text-xs text-blue-700">
+                                    <h4 className="font-bold text-blue-900 text-sm mb-1">Quality Control</h4>
+                                    <p className="text-xs text-blue-700/80">
                                         {stats.unanswered} student quer{stats.unanswered !== 1 ? 'ies' : 'y'} need{stats.unanswered === 1 && 's'} answers.
                                     </p>
                                     <span className="text-xs text-blue-600 italic mt-1 inline-block">Tap to review & nudge.</span>
@@ -159,7 +175,7 @@ const AdminDashboard = () => {
                         )}
 
                         {/* Database Status (Mocked but realistic based on app load) */}
-                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex gap-3">
+                        <div className="p-4 bg-slate-50/50 rounded-xl border border-slate-200 flex gap-3">
                             <TrendingUp className="text-slate-600 shrink-0" size={20} />
                             <div>
                                 <h4 className="font-bold text-slate-800 text-sm mb-1">System Load</h4>
@@ -167,34 +183,15 @@ const AdminDashboard = () => {
                             </div>
                         </div>
                     </div>
-                </section>
+                </Card>
             </div>
 
             <UnansweredQueriesModal
                 isOpen={isQueriesModalOpen}
                 onClose={() => setIsQueriesModalOpen(false)}
             />
-        </div>
+        </PageTransition>
     );
-};
-
-const StatCard = ({ icon, label, value, trend, trendColor, to }) => {
-    const CardContent = (
-        <motion.div
-            whileHover={{ y: -5 }}
-            className={`bg-white p-6 rounded-2xl border border-slate-200 shadow-sm ${to ? 'cursor-pointer hover:border-blue-300 hover:shadow-md transition-all' : ''}`}
-        >
-            <div className="flex items-start justify-between mb-4">
-                <div className="p-3 bg-slate-50 rounded-xl">{icon}</div>
-                <TrendingUp size={16} className={trendColor} />
-            </div>
-            <div className="text-3xl font-bold text-slate-900 mb-1">{value}</div>
-            <div className="text-sm font-medium text-slate-500">{label}</div>
-            <div className={`text-xs mt-2 font-medium ${trendColor}`}>{trend}</div>
-        </motion.div>
-    );
-
-    return to ? <Link to={to} className="block">{CardContent}</Link> : CardContent;
 };
 
 export default AdminDashboard;

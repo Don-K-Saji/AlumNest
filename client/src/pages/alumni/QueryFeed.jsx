@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Filter, Edit2, Check, X } from 'lucide-react';
+import { Filter, Edit2, Check, X, ThumbsUp } from 'lucide-react';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import { motion } from 'framer-motion';
+import PageTransition from '../../components/ui/PageTransition';
 
 const QueryFeed = () => {
     const { user } = useAuth();
@@ -61,7 +64,7 @@ const QueryFeed = () => {
             setEditingResponse(null);
         } catch (error) {
             console.error("Failed to update response", error);
-            alert("Failed to update response");
+            toast.error("Failed to update response");
         }
     };
 
@@ -77,9 +80,10 @@ const QueryFeed = () => {
             // Refresh queries to show the new response (or optimistically update)
             await fetchQueries();
             setReplyText(prev => ({ ...prev, [queryId]: '' }));
+            toast.success("Answer posted!");
         } catch (error) {
             console.error("Failed to submit reply", error);
-            alert("Failed to post answer");
+            toast.error("Failed to post answer");
         } finally {
             setSubmitting(prev => ({ ...prev, [queryId]: false }));
         }
@@ -87,8 +91,25 @@ const QueryFeed = () => {
 
     if (loading) return <div className="p-8 text-center text-slate-500">Loading query feed...</div>;
 
+    const container = {
+        hidden: { opacity: 0 },
+        show: {
+            opacity: 1,
+            transition: { staggerChildren: 0.1 }
+        }
+    };
+
+    const item = {
+        hidden: { opacity: 0, y: 20 },
+        show: {
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.5, ease: "easeOut" }
+        }
+    };
+
     return (
-        <div className="max-w-4xl">
+        <PageTransition className="max-w-4xl">
             <div className="flex items-center justify-between mb-8">
                 <div>
                     <h2 className="text-2xl font-bold text-slate-900">Student Queries</h2>
@@ -99,10 +120,15 @@ const QueryFeed = () => {
                 </button>
             </div>
 
-            <div className="space-y-6">
+            <motion.div
+                className="space-y-6"
+                variants={container}
+                initial="hidden"
+                animate="show"
+            >
                 {queries.length > 0 ? (
                     queries.map((q) => (
-                        <div key={q._id} className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+                        <motion.div key={q._id} variants={item} className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm transition-shadow hover:shadow-md">
                             <div className="flex items-start gap-4">
                                 <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold shrink-0">
                                     {q.author?.name ? q.author.name[0] : 'S'}
@@ -136,6 +162,12 @@ const QueryFeed = () => {
                                                         <div className="flex items-center gap-2">
                                                             <span className="font-bold text-sm text-slate-800">{resp.author?.name || 'Alumni'}</span>
                                                             <span className="text-xs text-slate-400">{new Date(resp.createdAt).toLocaleDateString()}</span>
+                                                            {resp.upvotes?.length > 0 && (
+                                                                <span className="flex items-center gap-1 text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full ml-1" title={`${resp.upvotes.length} people found this helpful`}>
+                                                                    <ThumbsUp size={12} className="fill-green-600" />
+                                                                    {resp.upvotes.length}
+                                                                </span>
+                                                            )}
                                                         </div>
 
                                                         {/* Edit Button for Owner */}
@@ -203,13 +235,13 @@ const QueryFeed = () => {
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
                     ))
                 ) : (
-                    <p className="text-center text-slate-500 py-10">No queries found. Great job!</p>
+                    <motion.p variants={item} className="text-center text-slate-500 py-10">No queries found. Great job!</motion.p>
                 )}
-            </div>
-        </div>
+            </motion.div>
+        </PageTransition>
     );
 };
 

@@ -7,7 +7,8 @@ import {
     UserCircle,
     LogOut,
     GraduationCap,
-    Trophy
+    Trophy,
+    AlertCircle
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import LogoutModal from '../../components/LogoutModal';
@@ -46,7 +47,29 @@ const AlumniLayout = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 flex">
+        <div className="min-h-screen bg-slate-50 flex relative">
+            {/* Unverified Overlay Blocker */}
+            {!user.isVerified && (
+                <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl max-w-md w-full p-8 text-center shadow-2xl relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-2 bg-amber-500"></div>
+                        <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <AlertCircle size={32} />
+                        </div>
+                        <h2 className="text-2xl font-bold text-slate-900 mb-3">Verification Pending</h2>
+                        <p className="text-slate-600 mb-8 leading-relaxed">
+                            Welcome to AlumNest! Your account is currently under review by our administrators. You will be able to access your dashboard and interact with students once your alumni status is verified.
+                        </p>
+                        <button
+                            onClick={handleLogoutConfirm}
+                            className="text-slate-500 hover:text-slate-800 font-medium text-sm flex items-center justify-center gap-2 mx-auto"
+                        >
+                            <LogOut size={16} /> Sign Out For Now
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Sidebar */}
             <aside className="w-64 bg-slate-900 text-white fixed h-full z-20 flex flex-col">
                 <div className="p-6 flex items-center gap-3 border-b border-slate-800">

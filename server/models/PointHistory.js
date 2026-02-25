@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const pointHistorySchema = new mongoose.Schema({
     user: {
@@ -25,4 +25,4 @@ const pointHistorySchema = new mongoose.Schema({
 
 const PointHistory = mongoose.model('PointHistory', pointHistorySchema);
 
-export default PointHistory;
+module.exports = PointHistory;

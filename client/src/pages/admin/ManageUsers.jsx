@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Search, Trash2, Edit, Plus } from 'lucide-react';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 import EditUserModal from '../../components/EditUserModal';
 import AddUserModal from '../../components/AddUserModal';
@@ -34,7 +35,7 @@ const ManageUsers = () => {
             setUsers(users.filter(u => u._id !== id));
         } catch (error) {
             console.error("Failed to delete user", error);
-            alert("Failed to delete user");
+            toast.error("Failed to delete user");
         }
     };
 

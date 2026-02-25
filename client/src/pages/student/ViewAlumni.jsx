@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { Search, Filter, MapPin, Briefcase } from 'lucide-react';
 import api from '../../services/api';
 import BadgeDisplay from '../../components/BadgeDisplay';
+import { motion } from 'framer-motion';
+import PageTransition from '../../components/ui/PageTransition';
 
 const ViewAlumni = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -23,6 +25,23 @@ const ViewAlumni = () => {
         fetchAlumni();
     }, []);
 
+    const container = {
+        hidden: { opacity: 0 },
+        show: {
+            opacity: 1,
+            transition: { staggerChildren: 0.1 }
+        }
+    };
+
+    const item = {
+        hidden: { opacity: 0, y: 20 },
+        show: {
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.5, ease: "easeOut" }
+        }
+    };
+
     const filteredAlumni = alumni.filter(a =>
         a.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (a.company && a.company.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -32,7 +51,7 @@ const ViewAlumni = () => {
     if (loading) return <div className="p-8 text-center text-slate-500">Loading alumni directory...</div>;
 
     return (
-        <div className="space-y-6">
+        <PageTransition className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
                     <h2 className="text-2xl font-bold text-slate-900">Alumni Directory</h2>
@@ -59,10 +78,20 @@ const ViewAlumni = () => {
             </div>
 
             {/* Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <motion.div
+                className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+                variants={container}
+                initial="hidden"
+                animate="show"
+            >
                 {filteredAlumni.length > 0 ? (
                     filteredAlumni.map((alum) => (
-                        <div key={alum._id} className="bg-white p-6 rounded-2xl border border-slate-200 hover:shadow-lg transition-shadow group">
+                        <motion.div
+                            key={alum._id}
+                            variants={item}
+                            whileHover={{ y: -4, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}
+                            className="bg-white p-6 rounded-2xl border border-slate-200 hover:border-blue-200 transition-colors group"
+                        >
                             <div className="flex items-start justify-between mb-4">
                                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg">
                                     {alum.name[0]}
@@ -116,15 +145,15 @@ const ViewAlumni = () => {
                                     Profile
                                 </Link>
                             </div>
-                        </div>
+                        </motion.div>
                     ))
                 ) : (
                     <div className="col-span-full text-center py-10 text-slate-500">
                         No alumni found matching your search.
                     </div>
                 )}
-            </div>
-        </div>
+            </motion.div>
+        </PageTransition>
     );
 };
 

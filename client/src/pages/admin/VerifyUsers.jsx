@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Check, X, Building, GraduationCap, MapPin } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import api from '../../services/api';
 
@@ -30,7 +31,7 @@ const VerifyUsers = () => {
             setPendingUsers(pendingUsers.filter(u => u._id !== id));
         } catch (error) {
             console.error("Failed to approve user", error);
-            alert("Failed to verify user");
+            toast.error("Failed to verify user");
         }
     };
 

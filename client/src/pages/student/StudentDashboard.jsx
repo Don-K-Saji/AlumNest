@@ -2,8 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import { motion } from 'framer-motion';
-import { MessageSquare, Users, CheckCircle, ArrowUpRight, Search } from 'lucide-react';
+import { MessageSquare, Users, CheckCircle, ArrowUpRight, Search, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import PageTransition from '../../components/ui/PageTransition';
+import Card from '../../components/ui/Card';
+import StatCard from '../../components/ui/StatCard';
+import Button from '../../components/ui/Button';
 
 const StudentDashboard = () => {
     const { user } = useAuth();
@@ -30,7 +34,6 @@ const StudentDashboard = () => {
 
                 // Calculate Stats
                 const userQueries = queries.filter(q => q.author === user._id || q.author?._id === user._id);
-                // Note: Assuming 'resolved' status exists or using responses length > 0 logic
                 const solvedCount = userQueries.filter(q => q.status === 'Resolved' || q.responses?.length > 0).length;
 
                 setStats({
@@ -62,38 +65,54 @@ const StudentDashboard = () => {
     }
 
     return (
-        <div className="space-y-8">
+        <PageTransition className="space-y-8">
             {/* Stats Grid */}
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <StatCard
-                    icon={<MessageSquare className="text-blue-600" />}
+                    icon={<MessageSquare size={24} />}
                     label="Total Queries"
                     value={stats.totalQueries}
-                    trend="Platform wide"
+                    subtext="Platform wide"
+                    trend="Live"
+                    trendType="up"
+                    color="blue"
                 />
                 <StatCard
-                    icon={<CheckCircle className="text-green-600" />}
+                    icon={<CheckCircle size={24} />}
                     label="Resolved"
                     value={stats.solvedQueries}
-                    trend="Questions answered"
+                    subtext="Questions answered"
+                    trend="Verified"
+                    trendType="up"
+                    color="green"
                 />
                 <StatCard
-                    icon={<Users className="text-purple-600" />}
+                    icon={<Users size={24} />}
                     label="Alumni Available"
                     value={stats.connections}
-                    trend="Ready to mentor"
+                    subtext="Ready to mentor"
+                    trend="Active"
+                    trendType="up"
+                    color="purple"
                 />
             </div>
 
             <div className="grid md:grid-cols-2 gap-8">
                 {/* Recent Activity */}
-                <section className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <Card variant="glass" className="h-full">
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="text-lg font-bold text-slate-900">Recent Queries</h3>
-                        <Link to="/student/queries" className="text-sm text-blue-600 font-medium hover:underline">View All</Link>
+                        <Link to="/student/queries" className="text-sm text-blue-600 font-medium hover:underline flex items-center gap-1">
+                            View All <ArrowRight size={14} />
+                        </Link>
                     </div>
 
-                    <div className="space-y-4">
+                    <motion.div
+                        className="space-y-4"
+                        variants={container}
+                        initial="hidden"
+                        animate="show"
+                    >
                         {recentQueries.length > 0 ? (
                             recentQueries.map((query) => (
                                 <ActivityItem
@@ -106,17 +125,24 @@ const StudentDashboard = () => {
                         ) : (
                             <p className="text-sm text-slate-500 text-center py-4">No queries posted yet. Be the first!</p>
                         )}
-                    </div>
-                </section>
+                    </motion.div>
+                </Card>
 
                 {/* Recommended Alumni */}
-                <section className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <Card variant="glass" className="h-full">
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="text-lg font-bold text-slate-900">Recommended Mentors</h3>
-                        <Link to="/student/alumni" className="text-sm text-blue-600 font-medium hover:underline">Find More</Link>
+                        <Link to="/student/alumni" className="text-sm text-blue-600 font-medium hover:underline flex items-center gap-1">
+                            Find More <ArrowRight size={14} />
+                        </Link>
                     </div>
 
-                    <div className="space-y-4">
+                    <motion.div
+                        className="space-y-4"
+                        variants={container}
+                        initial="hidden"
+                        animate="show"
+                    >
                         {recommendedAlumni.length > 0 ? (
                             recommendedAlumni.map((alum) => (
                                 <MentorItem
@@ -130,63 +156,76 @@ const StudentDashboard = () => {
                         ) : (
                             <p className="text-sm text-slate-500 text-center py-4">No alumni found yet.</p>
                         )}
-                    </div>
-                </section>
+                    </motion.div>
+                </Card>
             </div>
-        </div>
+        </PageTransition>
     );
 };
 
-const StatCard = ({ icon, label, value, trend }) => (
-    <motion.div
-        whileHover={{ y: -5 }}
-        className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm"
-    >
-        <div className="flex items-start justify-between mb-4">
-            <div className="p-3 bg-slate-50 rounded-xl">{icon}</div>
-            <span className="text-xs font-medium px-2 py-1 bg-green-50 text-green-700 rounded-full flex items-center gap-1">
-                <ArrowUpRight size={12} /> Live
-            </span>
-        </div>
-        <div className="text-3xl font-bold text-slate-900 mb-1">{value}</div>
-        <div className="text-sm font-medium text-slate-500">{label}</div>
-        <div className="text-xs text-slate-400 mt-2">{trend}</div>
-    </motion.div>
-);
+// Animation Variants
+const container = {
+    hidden: { opacity: 0 },
+    show: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.15
+        }
+    }
+};
+
+const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            duration: 0.5,
+            ease: "easeOut"
+        }
+    }
+};
 
 const ActivityItem = ({ title, status, time }) => (
-    <div className="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-lg transition-colors border border-transparent hover:border-slate-100">
-        <div className={`w-2 h-2 rounded-full ${status === 'Answered' || status === 'Resolved' ? 'bg-green-500' : 'bg-amber-500'}`}></div>
+    <motion.div
+        variants={item}
+        whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.6)' }}
+        className="flex items-center gap-4 p-3 rounded-xl border border-transparent hover:border-blue-100 hover:shadow-sm cursor-pointer group"
+    >
+        <div className={`w-2.5 h-2.5 rounded-full ${status === 'Answered' || status === 'Resolved' ? 'bg-green-500 shadow-green-500/50 shadow-sm' : 'bg-amber-500 shadow-amber-500/50 shadow-sm'}`}></div>
         <div className="flex-1">
-            <h4 className="font-medium text-slate-900 line-clamp-1">{title}</h4>
-            <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
-                <span>{status}</span>
+            <h4 className="font-medium text-slate-900 line-clamp-1 group-hover:text-blue-600 transition-colors">{title}</h4>
+            <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
+                <span className={`px-1.5 py-0.5 rounded ${status === 'Answered' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>{status}</span>
                 <span>•</span>
                 <span>{time}</span>
             </div>
         </div>
-        <Link to="/student/queries" className="ml-auto">
-            <ArrowUpRight size={16} className="text-slate-400 hover:text-blue-600" />
+        <Link to="/student/queries">
+            <Button variant="ghost" size="sm" className="!p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <ArrowUpRight size={16} />
+            </Button>
         </Link>
-    </div>
+    </motion.div>
 );
 
 const MentorItem = ({ id, name, role }) => (
-    <div className="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-lg transition-colors border border-transparent hover:border-slate-100">
-        <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold">
+    <motion.div
+        variants={item}
+        whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.6)' }}
+        className="flex items-center gap-4 p-3 rounded-xl border border-transparent hover:border-purple-100 hover:shadow-sm cursor-pointer group"
+    >
+        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center text-slate-600 font-bold shadow-inner group-hover:scale-105 transition-transform">
             {name[0]}
         </div>
         <div>
-            <h4 className="font-medium text-slate-900">{name}</h4>
+            <h4 className="font-medium text-slate-900 group-hover:text-purple-600 transition-colors">{name}</h4>
             <p className="text-xs text-slate-500">{role}</p>
         </div>
-        <Link
-            to={`/student/alumni/${id}`}
-            className="ml-auto text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full hover:bg-blue-100 transition-colors"
-        >
-            View
+        <Link to={`/student/alumni/${id}`} className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button variant="outline" size="sm" className="!px-3 !py-1 text-xs">View</Button>
         </Link>
-    </div>
+    </motion.div>
 );
 
 export default StudentDashboard;

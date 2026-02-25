@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import EditProfileModal from '../../components/EditProfileModal';
 import BadgeDisplay from '../../components/BadgeDisplay';
+import PageTransition from '../../components/ui/PageTransition';
 
 const AlumniProfile = () => {
     const { user: authUser } = useAuth();
@@ -26,8 +27,25 @@ const AlumniProfile = () => {
 
     if (!user) return null;
 
+    const container = {
+        hidden: { opacity: 0 },
+        show: {
+            opacity: 1,
+            transition: { staggerChildren: 0.1 }
+        }
+    };
+
+    const item = {
+        hidden: { opacity: 0, y: 20 },
+        show: {
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.5, ease: "easeOut" }
+        }
+    };
+
     return (
-        <div className="max-w-4xl mx-auto">
+        <PageTransition className="max-w-4xl mx-auto">
             <div className="mb-8">
                 {/* Profile Header - Contained in Blue Background */}
                 <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 flex items-center gap-6 shadow-lg relative overflow-hidden">
@@ -74,10 +92,15 @@ const AlumniProfile = () => {
                 </div>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
+            <motion.div
+                className="grid md:grid-cols-3 gap-8"
+                variants={container}
+                initial="hidden"
+                animate="show"
+            >
                 {/* Left Column - Info */}
                 <div className="md:col-span-2 space-y-6">
-                    <section className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <motion.section variants={item} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                         <h3 className="text-lg font-bold text-slate-900 mb-6">Personal Information</h3>
                         <div className="space-y-4">
                             <ProfileField icon={User} label="Full Name" value={user.name} />
@@ -90,9 +113,9 @@ const AlumniProfile = () => {
                                 </div>
                             )}
                         </div>
-                    </section>
+                    </motion.section>
 
-                    <section className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <motion.section variants={item} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                         <h3 className="text-lg font-bold text-slate-900 mb-6">Professional Details</h3>
                         <div className="space-y-4">
                             <ProfileField icon={Briefcase} label="Current Role" value={`${user.jobTitle || 'N/A'} at ${user.company || 'N/A'}`} />
@@ -117,12 +140,12 @@ const AlumniProfile = () => {
                                 </div>
                             </div>
                         </div>
-                    </section>
+                    </motion.section>
                 </div>
 
                 {/* Right Column - Skills & Badges */}
                 <div className="space-y-6">
-                    <section className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <motion.section variants={item} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                         <h3 className="text-lg font-bold text-slate-900 mb-4">Skills</h3>
                         <div className="flex flex-wrap gap-2">
                             {user.skills && user.skills.length > 0 ? (
@@ -135,9 +158,9 @@ const AlumniProfile = () => {
                                 <span className="text-slate-400 text-sm">No skills added yet</span>
                             )}
                         </div>
-                    </section>
+                    </motion.section>
 
-                    <section className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <motion.section variants={item} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                         <h3 className="text-lg font-bold text-slate-900 mb-4">Impact</h3>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="p-4 bg-slate-50 rounded-xl text-center flex flex-col justify-center">
@@ -146,15 +169,15 @@ const AlumniProfile = () => {
                             </div>
                             <BadgeDisplay badge={user.badges?.[user.badges.length - 1] || 'Rookie'} variant="card" size="lg" />
                         </div>
-                    </section>
+                    </motion.section>
                 </div>
-            </div>
+            </motion.div>
 
             <EditProfileModal
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
             />
-        </div >
+        </PageTransition>
     );
 };
 
