@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle2, Star, Target, MessageCircle, UserCheck, History, Award } from 'lucide-react';
 import api from '../services/api';
@@ -34,21 +35,23 @@ const PointsHistoryModal = ({ isOpen, onClose, points, level, user }) => {
         { icon: Star, label: 'Receive a Like', points: 10, completed: false },
     ];
 
-    return (
+    if (typeof document === 'undefined') return null;
+
+    return createPortal(
         <AnimatePresence>
             {isOpen && (
-                <>
+                <div className="fixed inset-0 z-[100]">
                     {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 transition-opacity"
+                        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
                     />
 
                     {/* Modal */}
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+                    <div className="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
                         <motion.div
                             initial={{ scale: 0.95, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -145,9 +148,10 @@ const PointsHistoryModal = ({ isOpen, onClose, points, level, user }) => {
                             </div>
                         </motion.div>
                     </div>
-                </>
+                </div>
             )}
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
     );
 };
 

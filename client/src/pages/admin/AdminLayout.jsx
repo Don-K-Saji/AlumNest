@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, ShieldCheck, Settings, LogOut, Bell, UserCircle } from 'lucide-react';
+import { LayoutDashboard, Users, ShieldCheck, Settings, LogOut, Bell, UserCircle, Trophy } from 'lucide-react';
 
 import { useAuth } from '../../context/AuthContext';
 import LogoutModal from '../../components/LogoutModal';
@@ -27,6 +27,7 @@ const AdminLayout = () => {
         { icon: LayoutDashboard, label: 'Dashboard', path: '/admin/dashboard' },
         { icon: ShieldCheck, label: 'Verify Users', path: '/admin/verify-users' },
         { icon: Users, label: 'Manage Users', path: '/admin/users' },
+        { icon: Trophy, label: 'Leaderboard', path: '/admin/leaderboard' },
         { icon: Settings, label: 'Settings', path: '/admin/settings' },
     ];
 

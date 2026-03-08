@@ -25,6 +25,9 @@ const awardPoints = async (userId, points, action, type = 'other') => {
     const user = await User.findById(userId);
     if (!user) return;
 
+    // Only award points to alumni
+    if (user.role !== 'alumni') return;
+
     user.points = (user.points || 0) + points;
 
     // Check Badges

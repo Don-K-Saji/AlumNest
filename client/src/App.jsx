@@ -65,6 +65,7 @@ function App() {
           <Route path="verify-users" element={<VerifyUsers />} />
           <Route path="users" element={<ManageUsers />} />
           <Route path="settings" element={<AdminSettings />} />
+          <Route path="leaderboard" element={<Leaderboard />} />
         </Route>
       </Routes>
       <Toaster

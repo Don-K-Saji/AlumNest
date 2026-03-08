@@ -71,20 +71,6 @@ const StudentProfile = () => {
                             )}
                         </div>
                     </section>
-
-                    <section className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                        <h3 className="text-lg font-bold text-slate-900 mb-6">Academic Stats</h3>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="p-4 bg-slate-50 rounded-xl text-center">
-                                <div className="text-2xl font-bold text-blue-600">{user.points || 0}</div>
-                                <div className="text-xs text-slate-500 uppercase tracking-wide font-medium mt-1">Community Points</div>
-                            </div>
-                            <div className="p-4 bg-slate-50 rounded-xl text-center">
-                                <div className="text-2xl font-bold text-green-600">{user.badges ? user.badges.length : 0}</div>
-                                <div className="text-xs text-slate-500 uppercase tracking-wide font-medium mt-1">Badges Earned</div>
-                            </div>
-                        </div>
-                    </section>
                 </div>
 
                 {/* Right Column - Skills/Badges */}
